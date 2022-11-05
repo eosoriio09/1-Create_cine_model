@@ -1,6 +1,0 @@
--- 1: Crear esquema
-DROP SCHEMA `cine_model` ;
--- Creacion de SCHEMA
-CREATE SCHEMA `cine_model` ;
--- Seleccionar Schema
-USE cine_model;
