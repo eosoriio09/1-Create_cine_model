@@ -1,0 +1,210 @@
+-- 1: Crear esquema
+DROP SCHEMA `cine_model` ;
+-- Creacion de SCHEMA
+CREATE SCHEMA `cine_model` ;
+-- Seleccionar Schema
+USE cine_model;
+-- 2: Creacion de cada tabla
+DROP TABLE IF EXISTS cine;
+CREATE TABLE cine(
+	id_cine int NOT NULL AUTO_INCREMENT,
+    nombre_cine varchar (20) NOT NULL UNIQUE,
+    direccion_cine varchar (100) NOT NULL UNIQUE,
+--	id_cod_postal int NOT NULL,
+	id_localidad int NOT NULL,
+    PRIMARY KEY (id_cine)
+);
+DROP TABLE IF EXISTS codigo_postal;
+CREATE TABLE codigo_postal(
+	id_cod_postal int NOT NULL AUTO_INCREMENT,
+	codigo_postal int NOT NULL UNIQUE,
+	PRIMARY KEY (id_cod_postal)
+);
+DROP TABLE IF EXISTS localidad;
+CREATE TABLE localidad(
+	id_localidad int NOT NULL AUTO_INCREMENT,
+    colonia varchar (50) NOT NULL UNIQUE,
+	localidad varchar (50) NOT NULL,
+	estado varchar (50) NOT NULL,
+	id_cod_postal int NOT NULL,
+	PRIMARY KEY (id_localidad)
+);
+
+DROP TABLE IF EXISTS  cliente;
+CREATE TABLE cliente(
+	id_cliente int NOT NULL AUTO_INCREMENT,
+    nombre_cliente varchar(20) NOT NULL, 
+    apellido varchar(20) NOT NULL,
+    domicilio varchar (200),
+    correo varchar (100) NOT NULL UNIQUE,
+    id_tipo_cliente int NOT NULL,
+    PRIMARY KEY (id_cliente)
+);
+DROP TABLE IF EXISTS tipo_cliente;
+CREATE TABLE tipo_cliente(
+	id_tipo_cliente int NOT NULL AUTO_INCREMENT,
+	tipo_cliente varchar (20) NOT NULL UNIQUE,
+	descripcion varchar (300) NOT NULL,
+	PRIMARY KEY (id_tipo_cliente)
+);
+DROP TABLE IF EXISTS  dulceria;
+CREATE TABLE dulceria(
+	id_dulce int NOT NULL AUTO_INCREMENT,
+    nombre_dulce varchar (20) NOT NULL,
+    costo decimal (5,2) NOT NULL,
+	PRIMARY KEY (id_dulce)
+);
+DROP TABLE IF EXISTS  sala;
+CREATE TABLE sala(
+	id_sala int NOT NULL AUTO_INCREMENT,
+    nombre_sala varchar (20) NOT NULL UNIQUE,
+    costo_sala decimal (5,2) NOT NULL,
+	id_tipo_sala int NOT NULL,
+    PRIMARY KEY (id_sala)
+);
+DROP TABLE IF EXISTS tipo_sala;
+CREATE TABLE tipo_sala(
+	id_tipo_sala int NOT NULL AUTO_INCREMENT,
+    tipo_sala varchar (20) NOT NULL UNIQUE,
+    descripcion_tipo_sala varchar (500) NOT NULL,
+    PRIMARY KEY (id_tipo_sala)
+);
+DROP TABLE IF EXISTS pelicula;
+CREATE TABLE pelicula(
+	id_pelicula int NOT NULL AUTO_INCREMENT,
+    nombre_pelicula varchar (20) NOT NULL UNIQUE,
+    resena varchar (500) NOT NULL,
+    id_pais_origen INT NOT NULL,
+    fecha_estreno date,
+	id_tipo_pelicula int NOT NULL,
+    PRIMARY KEY (id_pelicula)
+);
+DROP TABLE IF EXISTS tipo_pelicula;
+CREATE TABLE tipo_pelicula(
+	id_tipo_pelicula int NOT NULL AUTO_INCREMENT,
+	categoria varchar (20) NOT NULL UNIQUE,
+	descripcion varchar (500) NOT NULL,
+	PRIMARY KEY (id_tipo_pelicula)
+);
+DROP TABLE IF EXISTS pais_origen;
+CREATE TABLE pais_origen(
+	id_pais_origen int NOT NULL AUTO_INCREMENT,
+	codigo_pais varchar (3) NOT NULL UNIQUE,
+	nombre_pais varchar (50) NOT NULL UNIQUE,
+	PRIMARY KEY (id_pais_origen)
+);
+DROP TABLE IF EXISTS ticket;
+CREATE TABLE ticket(
+	id_ticekt int NOT NULL AUTO_INCREMENT,
+    id_cliente int NOT NULL,
+    id_cine int NOT NULL,
+    id_pelicula int NOT NULL,
+    id_sala int NOT NULL,
+    PRIMARY KEY (id_ticekt) 
+);
+
+
+-- 3: Creacion de llaves foraneas
+
+ALTER TABLE cine ADD CONSTRAINT fk_id_localidad FOREIGN KEY (id_localidad) REFERENCES localidad (id_localidad);
+ALTER TABLE localidad ADD CONSTRAINT fk_id_codigo_postal FOREIGN KEY (id_cod_postal) REFERENCES codigo_postal(id_cod_postal);
+ALTER TABLE cliente ADD CONSTRAINT fk_id_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES tipo_cliente (id_tipo_cliente);
+ALTER TABLE sala ADD CONSTRAINT fk_id_tipo_sala FOREIGN KEY (id_tipo_sala) REFERENCES tipo_sala (id_tipo_sala);
+ALTER TABLE pelicula ADD CONSTRAINT fk_id_pais_origen FOREIGN KEY (id_pais_origen) REFERENCES pais_origen (id_pais_origen);
+ALTER TABLE pelicula ADD CONSTRAINT fk_id_tipo_pelicula FOREIGN KEY (id_tipo_pelicula) REFERENCES tipo_pelicula (id_tipo_pelicula);
+ALTER TABLE ticket ADD CONSTRAINT fk_id_cliete FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente);
+ALTER TABLE ticket ADD CONSTRAINT fk_id_cine FOREIGN KEY (id_cine) REFERENCES cine(id_cine);
+ALTER TABLE ticket ADD CONSTRAINT fk_id_pelicula FOREIGN KEY (id_pelicula) REFERENCES pelicula(id_pelicula);
+ALTER TABLE ticket ADD CONSTRAINT fk_id_sala FOREIGN KEY (id_sala) REFERENCES sala(id_sala);
+
+-- 4: Insersiones a las tablas
+
+--Iserciones a la tabla codigo_postal
+
+INSERT INTO codigo_postal(codigo_postal) VALUES (09100);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09130);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09140);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09180);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09200);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09208);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09209);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09210);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09220);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09230);
+INSERT INTO codigo_postal(codigo_postal) VALUES (09239);
+
+
+-- Insersiones a la tabla localidad
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Juan Escutia','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09100));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('San Lorenzo Xicotencatl','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09130));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Santa Martha Acatitla Norte','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09140));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Ermita Zaragoza','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09180));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Unidad Vicente Guerrero','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09200));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Chinampac de Juárez','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09208));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Renovación','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09209));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Tepalcates','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09210));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Unidad Ejército Constitucionalista','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09220));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Álvaro Obregón','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09230));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Ejército de Oriente','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09230));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('El Paraíso','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09230));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('José María Morelos y Pavón','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09230));
+INSERT INTO localidad (colonia, localidad, estado,id_cod_postal) VALUES ('Ejército de Oriente Zona Peñón','Iztapalapa','CDMX',(SELECT id_cod_postal FROM codigo_postal WHERE codigo_postal=09239));
+
+-- Insersiones tabla cine
+INSERT INTO cine (nombre_cine,direccion_cine,id_localidad)VALUES ('Cinemex Zaragoza','Calz. Ignacio Zaragoza 2221',(SELECT id_localidad FROM localidad WHERE colonia like 'El Paraíso'));
+INSERT INTO cine (nombre_cine,direccion_cine,id_localidad)VALUES ('Cinemex Via San Juan','Calz. Ignacio Zaragoza 1433',(SELECT id_localidad FROM localidad WHERE colonia like 'Tepalcates'));
+INSERT INTO cine (nombre_cine,direccion_cine,id_localidad)VALUES ('Cinemex Iztapalapa','Anillo Perif. 2141, Chinam Pac de Juárez',(SELECT id_localidad FROM localidad WHERE colonia like 'Unidad Ejército Constitucionalista'));
+INSERT INTO cine (nombre_cine,direccion_cine,id_localidad)VALUES ('Cinemex Plaza O','Canal de Tezontle 1520',(SELECT id_localidad FROM localidad WHERE colonia like 'Juan Escutia'));
+INSERT INTO cine (nombre_cine,direccion_cine,id_localidad)VALUES ('Cinepolis Ermita','Ermita Iztapalapa 3417',(SELECT id_localidad FROM localidad WHERE colonia like 'Ermita Zaragoza'));
+-- Insersiones tabla tipo_cliente
+INSERT INTO tipo_cliente (tipo_cliente,descripcion)VALUES ('Estandard','Descuentos del 50% de descuento en dulcería el día de su cumpleaños presentando su identificación y 1 entrada gratis despues de 8 visitas al cine');
+INSERT INTO tipo_cliente (tipo_cliente,descripcion)VALUES ('Premium','Su membresia le incluye descuentos, 2 boletos gratis por mes, un paquete en dulcería en su cumpleaños presentando su identificacion y una entrada gratis despues de 5 visitas al cine');
+-- Insersiones tabla cliente
+INSERT INTO cliente (nombre_cliente,apellido,domicilio,correo,id_tipo_cliente) VALUES('Erick','Osorio','Cutberto Aroche 9','erickosorio@mail.com',(SELECT id_tipo_cliente FROM tipo_cliente WHERE tipo_cliente LIKE 'Premium'));
+INSERT INTO cliente (nombre_cliente,apellido,domicilio,correo,id_tipo_cliente) VALUES('Vanessa','Atonal','Florencio Antillon 130','vanessaatonal@mail.com',(SELECT id_tipo_cliente FROM tipo_cliente WHERE tipo_cliente LIKE 'Estandard'));
+INSERT INTO cliente (nombre_cliente,apellido,domicilio,correo,id_tipo_cliente) VALUES('Benjamin','Ortiz','Laureles 56','benjaminortiz@mail.com',(SELECT id_tipo_cliente FROM tipo_cliente WHERE tipo_cliente LIKE 'Estandard'));
+INSERT INTO cliente (nombre_cliente,apellido,domicilio,correo,id_tipo_cliente) VALUES('Oliver','Gonzalez','','olivergonzalez@mail.com',(SELECT id_tipo_cliente FROM tipo_cliente WHERE tipo_cliente LIKE 'Premium'));
+-- Inserviones tabla dulceria
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Refresco Grande',90);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Refresco Mediano',80);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Refresco Chico',70);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Palomitas Grandes',90);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Palomitas Medianas',80);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Palomitas Chicas',70);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Chocolate',20);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Icee de Sabores',85);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('HotDog',45);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Nachos C/Queso',70);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Nachos S/Queso',50);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Pizza',30);
+INSERT INTO dulceria(nombre_dulce,costo) VALUES('Caramelos',10);
+-- Insersiones tabla pais_origen
+INSERT INTO pais_origen(codigo_pais,nombre_pais) VALUES('USA','Estados Unidos de America');
+INSERT INTO pais_origen(codigo_pais,nombre_pais) VALUES('JAP','Japon');
+INSERT INTO pais_origen(codigo_pais,nombre_pais) VALUES('MEX','Mexico');
+INSERT INTO pais_origen(codigo_pais,nombre_pais) VALUES('ARG','Argentina');
+INSERT INTO pais_origen(codigo_pais,nombre_pais) VALUES('BRA','Brazil');
+INSERT INTO pais_origen(codigo_pais,nombre_pais) VALUES('COR','Corea');
+-- Insersiones tabla tipo_pelicula
+INSERT INTO tipo_pelicula(categoria,descripcion) VALUES('Terror','Su principal objetivo es causar miedo, horror, incomodidad o preocupación.');
+INSERT INTO tipo_pelicula(categoria,descripcion) VALUES('Comedia','Diseñadas específicamente para provocar la risa o la alegría entre los espectadores.');
+INSERT INTO tipo_pelicula(categoria,descripcion) VALUES('Suspenso','Conocido también como intriga, estas películas se desarrollan rápidamente, y todos sus elementos giran entorno un mismo elemento intrigante.');
+INSERT INTO tipo_pelicula(categoria,descripcion) VALUES('Manga','En ellas se incluyen personajes irreales o totalmente inventados, inexistentes en nuestra realidad. También podemos conocer este género de cine como “fantástico”. No se basa en ideas que puedan llegar a materializarse.');
+INSERT INTO tipo_pelicula(categoria,descripcion) VALUES('Accion',' En este género prevalecen altas dosis de adrenalina con una buena carga de movimiento, fugas, acrobacias, peleas, guerras, persecuciones y una lucha contra el mal.');
+-- Insersiones tabla pelicula
+INSERT INTO pelicula (nombre_pelicula,resena,id_pais_origen,fecha_estreno,id_tipo_pelicula) VALUES('Black Adam','Black Adam es una película estadounidense de superhéroes basada en el personaje homónimo de DC Comics. Producida por DC Films, New Line Cinema, Seven Bucks Productions y FlynnPictureCo., y distribuida por Warner Bros. Pictures, pretende ser una derivación de ¡Shazam!',(SELECT id_pais_origen FROM pais_origen WHERE codigo_pais like 'USA'),'20221020',(SELECT id_tipo_pelicula FROM tipo_pelicula WHERE categoria like 'Accion'));
+INSERT INTO pelicula (nombre_pelicula,resena,id_pais_origen,fecha_estreno,id_tipo_pelicula) VALUES('One Piece Film','One Piece Film: Red es una película de anime de acción y aventura de fantasía dirigida por Gorō Taniguchi y producida por Toei Animation.​​ Es el decimoquinto largometraje de la serie de películas de One Piece, basado en el manga del mismo nombre escrito e ilustrado por Eiichiro Oda',(SELECT id_pais_origen FROM pais_origen WHERE codigo_pais like 'JAP'),'2022-11-03',(SELECT id_tipo_pelicula FROM tipo_pelicula WHERE categoria like 'Manga'));
+INSERT INTO pelicula (nombre_pelicula,resena,id_pais_origen,fecha_estreno,id_tipo_pelicula) VALUES('Prey for the Devil','Prey for the Devil es una próxima película de terror sobrenatural estadounidense dirigida por Daniel Stamm y escrita por Robert Zappia. Es protagonizada por Virginia Madsen y también por Ben Cross en su último papel cinematográfico, y a quien está dedicada la película.',(SELECT id_pais_origen FROM pais_origen WHERE codigo_pais like 'USA'),'2022-10-27',(SELECT id_tipo_pelicula FROM tipo_pelicula WHERE categoria like 'Accion'));
+INSERT INTO pelicula (nombre_pelicula,resena,id_pais_origen,fecha_estreno,id_tipo_pelicula) VALUES('Bros','Bros es una película de comedia romántica con temática LGBT estadounidense de 2022 dirigida por Nicholas Stoller a partir de un guion que coescribió con Billy Eichner, quien también protagoniza y productor ejecutivo.',(SELECT id_pais_origen FROM pais_origen WHERE codigo_pais like 'MEX'),'2022-11-09',(SELECT id_tipo_pelicula FROM tipo_pelicula WHERE categoria like 'Comedia'));
+-- Insersiones tabla tipo_sala
+INSERT INTO tipo_sala (tipo_sala,descripcion_tipo_sala) VALUES ('Tradicional','Pantalla normal');
+INSERT INTO tipo_sala (tipo_sala,descripcion_tipo_sala) VALUES ('3D','Tecnología de filmación y proyección de cine para que simule la visión tridimensional humana real.');
+INSERT INTO tipo_sala (tipo_sala,descripcion_tipo_sala) VALUES ('4D','Sistema de proyección de películas que recrea en la sala de proyección las condiciones físicas que se ven en la pantalla, como niebla, lluvia, viento, sonidos más intensos u olores, así como vibraciones en los asientos y otros efectos, con el objetivo de generar una mayor inmersión del público con respecto a una sala tradicional.');
+INSERT INTO tipo_sala (tipo_sala,descripcion_tipo_sala) VALUES ('IMAX','Tiene la capacidad de mostrar imágenes de mucho más tamaño y resolución que los sistemas de películas fotográficas convencionales');
+-- Insersiones tabla sala
+INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Azteca',100,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = 'Tradicional'));
+INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Maya',100,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = 'Tradicional'));
+INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Olmeca',100,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = 'Tradicional'));
+INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Tolteca',150,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = '3D'));
+INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Mixteca',200,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = '4D'));
+INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Mexica',250,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = 'IMAX'));
