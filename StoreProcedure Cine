@@ -1,0 +1,9 @@
+-- Store Procedure que actualiza el inventario de dulces por compra
+DELIMITER $$
+CREATE PROCEDURE SP_actualizar_inventario(id_dulce_a_actualizar int)
+BEGIN
+	UPDATE inventario_dulces
+    SET total_prod = total_prod -1
+    WHERE id_dulce = id_dulce_a_actualizar;
+END $$
+DELIMITER ;
