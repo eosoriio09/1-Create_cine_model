@@ -1,0 +1,30 @@
+-- Funcion para ver cuantas visitas lleva un cliente en el cine y saber que promocion le aplica
+DROP FUNCTION IF EXISTS visitas_por_cliente;
+DELIMITER $$
+CREATE FUNCTION visitas_por_cliente (id_cliente int)
+RETURNS varchar(20) DETERMINISTIC
+BEGIN
+	DECLARE visitas int;
+        
+	SET visitas = (select count(id_cliente) as Visitas
+	from ticket
+	WHERE id_cliente =id_cliente);
+    
+    RETURN visitas;
+END$$
+DELIMITER ;
+
+-- Funcion para calcular el iva del productor
+DROP FUNCTION IF EXISTS calcular_iva;
+DELIMITER $$
+CREATE FUNCTION calcular_iva (costo decimal(6,2))
+RETURNS decimal DETERMINISTIC
+BEGIN
+	DECLARE resultado decimal(6,2);
+    DECLARE iva_actual decimal (4,2);
+    SET iva_actual = 16;
+    SET resultado = ((costo*(iva_actual/100))+costo);
+       
+    RETURN resultado;
+END$$
+DELIMITER ;
