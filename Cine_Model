@@ -1,3 +1,9 @@
+**************PENDIENTES***************
+-- Inserviones tabla ticket con SP
+-- vista del menus
+-- funcion de iva
+--
+
 -- 1: Crear esquema
 DROP SCHEMA `cine_model` ;
 -- Creacion de SCHEMA
@@ -100,9 +106,16 @@ CREATE TABLE ticket(
     id_cine int NOT NULL,
     id_pelicula int NOT NULL,
     id_sala int NOT NULL,
+	fecha date NOT NULL,
     PRIMARY KEY (id_ticekt) 
 );
-
+DROP TABLE IF EXISTS inventario_dulces;
+CREATE TABLE inventario_dulces(
+	id_inventario_dulces int NOT NULL AUTO_INCREMENT,
+    id_dulce int NOT NULL,
+    total_prod int NOT NULL,
+    PRIMARY KEY (id_inventario_dulces)
+);
 
 -- 3: Creacion de llaves foraneas
 
@@ -116,10 +129,10 @@ ALTER TABLE ticket ADD CONSTRAINT fk_id_cliete FOREIGN KEY (id_cliente) REFERENC
 ALTER TABLE ticket ADD CONSTRAINT fk_id_cine FOREIGN KEY (id_cine) REFERENCES cine(id_cine);
 ALTER TABLE ticket ADD CONSTRAINT fk_id_pelicula FOREIGN KEY (id_pelicula) REFERENCES pelicula(id_pelicula);
 ALTER TABLE ticket ADD CONSTRAINT fk_id_sala FOREIGN KEY (id_sala) REFERENCES sala(id_sala);
-
+ALTER TABLE inventario_dulces ADD CONSTRAINT fk_id_dulce_inventario FOREIGN KEY (id_dulce) REFERENCES dulceria(id_dulce);
 -- 4: Insersiones a las tablas
 
---Iserciones a la tabla codigo_postal
+-- Iserciones a la tabla codigo_postal
 
 INSERT INTO codigo_postal(codigo_postal) VALUES (09100);
 INSERT INTO codigo_postal(codigo_postal) VALUES (09130);
@@ -208,4 +221,77 @@ INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Olmeca',100,(SELEC
 INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Tolteca',150,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = '3D'));
 INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Mixteca',200,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = '4D'));
 INSERT INTO sala(nombre_sala,costo_sala,id_tipo_sala) VALUES('Mexica',250,(SELECT id_tipo_sala FROM tipo_sala WHERE tipo_sala = 'IMAX'));
--- Inserviones tabla ticket
+
+-- Insersiones tabla inventario dulceria
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (1,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (2,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (3,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (4,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (5,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (6,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (7,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (8,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (9,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (10,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (11,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (12,100);
+INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (13,100);
+-- 5 Creacion de vistas
+-- vista para observar las ubicaciones de los cines
+DROP VIEW IF EXISTS cine_model.vw_ubicacion_cine;
+CREATE VIEW cine_model.vw_ubicacion_cine 
+AS
+	SELECT c.nombre_cine as Cine, c.direccion_cine as Direccion,l.colonia as Colonia, l.localidad as Localidad, cp.codigo_postal as CP
+	FROM cine c 
+	INNER JOIN localidad l ON l.id_localidad = c.id_localidad
+	INNER JOIN codigo_postal cp ON cp.id_cod_postal = l.id_cod_postal
+
+-- Vista para ver que tipo de usuario es	
+-- 6 Creacion de dos funciones
+-- Funcion para ver cuantas visitas lleva un cliente en el cine y saber que promocion le aplica
+DROP FUNCTION IF EXISTS visitas_por_cliente;
+DELIMITER $$
+CREATE FUNCTION visitas_por_cliente (id_cliente int)
+RETURNS varchar(20) DETERMINISTIC
+BEGIN
+	DECLARE visitas int;
+        
+	SET visitas = (select count(id_cliente) as Visitas
+	from ticket
+	WHERE id_cliente =id_cliente);
+    
+    RETURN visitas;
+END$$
+DELIMITER ;
+
+-- Funcion para calcular el iva del productor
+DROP FUNCTION IF EXISTS calcular_iva;
+DELIMITER $$
+CREATE FUNCTION calcular_iva (costo decimal(6,2))
+RETURNS decimal DETERMINISTIC
+BEGIN
+	DECLARE resultado decimal(6,2);
+    DECLARE iva_actual decimal (4,2);
+    SET iva_actual = 16;
+    SET resultado = ((costo*(iva_actual/100))+costo);
+       
+    RETURN resultado;
+END$$
+DELIMITER ;
+
+
+-- 7 Creacion de un store PROCEDURE
+-- Store Procedure que actualiza el inventario de dulces por compra
+DELIMITER $$
+CREATE PROCEDURE SP_actualizar_inventario(id_dulce_a_actualizar int)
+BEGIN
+	UPDATE inventario_dulces
+    SET total_prod = total_prod -1
+    WHERE id_dulce = id_dulce_a_actualizar;
+END $$
+DELIMITER ;
+
+-- 8 Creacion de triggers
+-- auditar quien modifico los costos de dulceria, quien elimino usuarios o modifico
+-- actualizar asientos ocupados
+
