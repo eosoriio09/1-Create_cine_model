@@ -6,11 +6,11 @@
 -- #################################### 
 -- #        1: Crear esquema          #
 -- ####################################
-DROP SCHEMA `cine_model_osorio` ;
+DROP SCHEMA IF EXISTS `cine_model_osorio` ;
 -- Creacion de SCHEMA
 CREATE SCHEMA `cine_model_osorio` ;
 -- Seleccionar Schema
-USE cine_model;
+USE cine_model_osorio;
 
 -- ####################################
 -- #     2: Creacion de cada tabla    #
@@ -111,7 +111,7 @@ CREATE TABLE ticket(
     id_pelicula int NOT NULL,
     id_sala int NOT NULL,
 	fecha date NOT NULL,
-    PRIMARY KEY (id_ticekt) 
+    PRIMARY KEY (id_ticket) 
 );
 DROP TABLE IF EXISTS inventario_dulces;
 CREATE TABLE inventario_dulces(
@@ -127,7 +127,7 @@ CREATE TABLE tbl_aud_cliente(
 	tabla_mod varchar (20) NOT NULL,
 	usuario varchar (20) NOT NULL,
 	campo_mod varchar (20) NOT NULL,
-	tipo varchar (50) NOT NULL,
+	tipo varchar (20) NOT NULL,
 	fecha datetime NOT NULL,
 	PRIMARY KEY (id_tbl_aud_cliente)
 );
@@ -277,7 +277,7 @@ AS
 	SELECT c.nombre_cine as Cine, c.direccion_cine as Direccion,l.colonia as Colonia, l.localidad as Localidad, cp.codigo_postal as CP
 	FROM cine c 
 	INNER JOIN localidad l ON l.id_localidad = c.id_localidad
-	INNER JOIN codigo_postal cp ON cp.id_cod_postal = l.id_cod_postal
+	INNER JOIN codigo_postal cp ON cp.id_cod_postal = l.id_cod_postal;
 
 -- Vista para ver que tipo de usuario es (pendiente para ver si es viable)
 
@@ -286,6 +286,7 @@ AS
 -- ####################################
 -- Funcion para ver cuantas visitas lleva un cliente en el cine y saber que promocion le aplica
 DROP FUNCTION IF EXISTS visitas_por_cliente;
+
 DELIMITER $$
 CREATE FUNCTION visitas_por_cliente (id_cliente int)
 RETURNS varchar(20) DETERMINISTIC
@@ -363,7 +364,7 @@ BEGIN
     VALUES (id_cliente,id_cine,id_pelicula,id_sala,now());
 END $$
 DELIMITER ;
-*/
+
 
 
 -- ####################################
