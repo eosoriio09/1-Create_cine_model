@@ -1,16 +1,20 @@
-**************PENDIENTES***************
--- Inserviones tabla ticket con SP
+-- **************PENDIENTES***************
 -- vista del menus
--- funcion de iva
---
+-- crear SP para insertar productos al inventario
+-- tabla auditoria de modificaciones, mejorar las que ya estan
 
--- 1: Crear esquema
-DROP SCHEMA `cine_model` ;
+-- #################################### 
+-- #        1: Crear esquema          #
+-- ####################################
+DROP SCHEMA `cine_model_osorio` ;
 -- Creacion de SCHEMA
-CREATE SCHEMA `cine_model` ;
+CREATE SCHEMA `cine_model_osorio` ;
 -- Seleccionar Schema
 USE cine_model;
--- 2: Creacion de cada tabla
+
+-- ####################################
+-- #     2: Creacion de cada tabla    #
+-- ####################################
 DROP TABLE IF EXISTS cine;
 CREATE TABLE cine(
 	id_cine int NOT NULL AUTO_INCREMENT,
@@ -101,7 +105,7 @@ CREATE TABLE pais_origen(
 );
 DROP TABLE IF EXISTS ticket;
 CREATE TABLE ticket(
-	id_ticekt int NOT NULL AUTO_INCREMENT,
+	id_ticket int NOT NULL AUTO_INCREMENT,
     id_cliente int NOT NULL,
     id_cine int NOT NULL,
     id_pelicula int NOT NULL,
@@ -116,9 +120,33 @@ CREATE TABLE inventario_dulces(
     total_prod int NOT NULL,
     PRIMARY KEY (id_inventario_dulces)
 );
+-- Tablas Auditoria
+DROP TABLE IF EXISTS tbl_aud_cliente;
+CREATE TABLE tbl_aud_cliente(
+	id_tbl_aud_cliente int NOT NULL AUTO_INCREMENT,
+	tabla_mod varchar (20) NOT NULL,
+	usuario varchar (20) NOT NULL,
+	campo_mod varchar (20) NOT NULL,
+	tipo varchar (50) NOT NULL,
+	fecha datetime NOT NULL,
+	PRIMARY KEY (id_tbl_aud_cliente)
+);
+DROP TABLE IF EXISTS tbl_aud_dulceria;
+CREATE TABLE tbl_aud_dulceria(
+	id_tbl_aud_dulceria int NOT NULL AUTO_INCREMENT,
+	nombre_dulce varchar (50) NOT NULL,
+	costo_ant decimal (6,2) NOT NULL,
+	costo_nue decimal (6,2) NOT NULL,
+	usuario varchar (20) NOT NULL,
+    tipo varchar (20) NOT NULL,
+	fecha datetime NOT NULL,
+	PRIMARY KEY (id_tbl_aud_dulceria)
+);
 
--- 3: Creacion de llaves foraneas
 
+-- ####################################
+-- #  3: Creacion de llaves foraneas  #
+-- ####################################
 ALTER TABLE cine ADD CONSTRAINT fk_id_localidad FOREIGN KEY (id_localidad) REFERENCES localidad (id_localidad);
 ALTER TABLE localidad ADD CONSTRAINT fk_id_codigo_postal FOREIGN KEY (id_cod_postal) REFERENCES codigo_postal(id_cod_postal);
 ALTER TABLE cliente ADD CONSTRAINT fk_id_tipo_cliente FOREIGN KEY (id_tipo_cliente) REFERENCES tipo_cliente (id_tipo_cliente);
@@ -130,8 +158,10 @@ ALTER TABLE ticket ADD CONSTRAINT fk_id_cine FOREIGN KEY (id_cine) REFERENCES ci
 ALTER TABLE ticket ADD CONSTRAINT fk_id_pelicula FOREIGN KEY (id_pelicula) REFERENCES pelicula(id_pelicula);
 ALTER TABLE ticket ADD CONSTRAINT fk_id_sala FOREIGN KEY (id_sala) REFERENCES sala(id_sala);
 ALTER TABLE inventario_dulces ADD CONSTRAINT fk_id_dulce_inventario FOREIGN KEY (id_dulce) REFERENCES dulceria(id_dulce);
--- 4: Insersiones a las tablas
 
+-- ####################################
+-- #   4: Insersiones a las tablas    #
+-- ####################################
 -- Iserciones a la tabla codigo_postal
 
 INSERT INTO codigo_postal(codigo_postal) VALUES (09100);
@@ -236,7 +266,10 @@ INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (10,100);
 INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (11,100);
 INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (12,100);
 INSERT INTO inventario_dulces (id_dulce,total_prod) VALUES (13,100);
--- 5 Creacion de vistas
+
+-- ####################################
+-- #       5 Creacion de vistas       #
+-- ####################################
 -- vista para observar las ubicaciones de los cines
 DROP VIEW IF EXISTS cine_model.vw_ubicacion_cine;
 CREATE VIEW cine_model.vw_ubicacion_cine 
@@ -246,8 +279,11 @@ AS
 	INNER JOIN localidad l ON l.id_localidad = c.id_localidad
 	INNER JOIN codigo_postal cp ON cp.id_cod_postal = l.id_cod_postal
 
--- Vista para ver que tipo de usuario es	
--- 6 Creacion de dos funciones
+-- Vista para ver que tipo de usuario es (pendiente para ver si es viable)
+
+-- ####################################	
+-- #     6 Creacion de funciones      #
+-- ####################################
 -- Funcion para ver cuantas visitas lleva un cliente en el cine y saber que promocion le aplica
 DROP FUNCTION IF EXISTS visitas_por_cliente;
 DELIMITER $$
@@ -279,8 +315,13 @@ BEGIN
 END$$
 DELIMITER ;
 
+-- Vista para ver el menu y ver paquetes
 
--- 7 Creacion de un store PROCEDURE
+
+
+-- ####################################
+-- # 7 Creacion de un store Procedure #
+-- ####################################
 -- Store Procedure que actualiza el inventario de dulces por compra
 DELIMITER $$
 CREATE PROCEDURE SP_actualizar_inventario(id_dulce_a_actualizar int)
@@ -290,8 +331,78 @@ BEGIN
     WHERE id_dulce = id_dulce_a_actualizar;
 END $$
 DELIMITER ;
+-- Store procedure que inserta en la tabla ticket la compra del cliente
+DROP PROCEDURE IF EXISTS SP_generar_ticket;
+DELIMITER $$
+CREATE PROCEDURE SP_generar_ticket(IN nombre_cli varchar (20),IN apellido_cli varchar (20),IN correo_cli varchar (50),IN cine varchar (50),IN pelicula varchar (50),IN sala varchar (20))
+BEGIN
+	DECLARE id_cliente int;
+    DECLARE id_cine int;
+    DECLARE id_pelicula int;
+    DECLARE id_sala int;
+    
+	SET id_cliente = (SELECT cli.id_cliente
+						FROM cliente cli
+						WHERE cli.nombre_cliente LIKE CONCAT('%',nombre_cli,'%') 
+							OR cli.apellido LIKE CONCAT('%',apellido_cli,'%') 
+                            OR cli.correo LIKE CONCAT('%',correo_cli,'%') LIMIT 1);
+    
+    SET id_cine = (SELECT ci.id_cine 
+					FROM cine ci
+					WHERE ci.nombre_cine like CONCAT('%',cine,'%') LIMIT 1);
+    
+    SET id_pelicula = (SELECT pe.id_pelicula
+						FROM pelicula pe
+                        WHERE pe.nombre_pelicula like CONCAT('%',pelicula,'%') LIMIT 1);
 
--- 8 Creacion de triggers
+    SET id_sala = (SELECT sa.id_sala
+					FROM sala sa
+					WHERE sa.nombre_sala LIKE CONCAT('%',sala,'%') LIMIT 1);
+    
+    INSERT INTO ticket(id_cliente,id_cine,id_pelicula,id_sala,fecha)
+    VALUES (id_cliente,id_cine,id_pelicula,id_sala,now());
+END $$
+DELIMITER ;
+*/
+
+
+-- ####################################
+-- #      8 Creacion de triggers      #
+-- ####################################
 -- auditar quien modifico los costos de dulceria, quien elimino usuarios o modifico
--- actualizar asientos ocupados
+DROP TRIGGER IF EXISTS `tr_cliente_update`;
+CREATE TRIGGER `tr_cliente_update`
+AFTER UPDATE ON cliente
+FOR EACH ROW
+INSERT INTO tbl_aud_cliente (tabla_mod, usuario, campo_mod,tipo, fecha) VALUES('cliente',session_user(),old.nombre_cliente,'Update',now());
+
+DROP TRIGGER IF EXISTS `tr_cliente_delete`;
+CREATE TRIGGER `tr_cliente_delete`
+AFTER DELETE ON cliente
+FOR EACH ROW
+INSERT INTO tbl_aud_cliente (tabla_mod, usuario, campo_mod,tipo, fecha) VALUES('cliente',session_user(),old.nombre_cliente,'Delete',now());
+
+DROP TRIGGER IF EXISTS `tr_cliente_insert`;
+CREATE TRIGGER `tr_cliente_insert`
+AFTER INSERT ON cliente
+FOR EACH ROW
+INSERT INTO tbl_aud_cliente (tabla_mod, usuario, campo_mod,tipo, fecha) VALUES('cliente',session_user(),new.nombre_cliente,'Insert',now());
+
+DROP TRIGGER IF EXISTS`tr_dulceria_update`;
+CREATE TRIGGER `tr_dulceria_update`
+AFTER UPDATE on dulceria
+FOR EACH ROW
+INSERT INTO tbl_aud_dulceria (nombre_dulce,costo_ant,costo_nue,usuario,tipo,fecha) VALUES (new.nombre_dulce,old.costo,new.costo,session_user(),'Update',now());
+
+DROP TRIGGER IF EXISTS `tr_dulceria_delete`;
+CREATE TRIGGER `tr_dulceria_delete`
+AFTER DELETE on dulceria
+FOR EACH ROW
+INSERT INTO tbl_aud_dulceria (nombre_dulce,costo_ant,costo_nue,usuario,tipo,fecha) VALUES (old.nombre_dulce,old.costo,old.costo,session_user(),'Delete',now());
+
+DROP TRIGGER IF EXISTS `tr_dulceria_insert`;
+CREATE TRIGGER `tr_dulceria_insert`
+AFTER INSERT on dulceria
+FOR EACH ROW
+INSERT INTO tbl_aud_dulceria (nombre_dulce,costo_ant,costo_nue,usuario,tipo,fecha) VALUES (new.nombre_dulce,new.costo,new.costo,session_user(),'Insert',now());
 
