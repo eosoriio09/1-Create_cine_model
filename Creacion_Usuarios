@@ -1,0 +1,53 @@
+-- ####################################
+-- #      9 Creacio de usuarios       #
+-- ####################################
+
+-- Creacion de usuarios vendedor, inventario, dba y administrador
+CREATE USER 'vendedor1'@'localhost' IDENTIFIED WITH mysql_native_password BY 'vendedor1123';
+CREATE USER 'inventario'@'localhost' IDENTIFIED WITH mysql_native_password BY 'inventario123';
+CREATE USER 'DBA'@'localhost' IDENTIFIED WITH mysql_native_password BY 'dba123';
+CREATE USER 'administrador'@'localhost' IDENTIFIED WITH mysql_native_password BY 'administrador123';
+
+-- Otorgar permisos a los usuarios
+
+-- Asignacion de todos los permisos al usuario dba
+GRANT ALL ON *.* TO 'dba'@'localhost';
+-- Asignacion de permisos de visualizar las tablas necesarias del cine, sin auditoria
+GRANT SELECT ON cine_model_osorio.cliente TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.cine TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.codigo_postal TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.localidad TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.dulceria TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.factura TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.inventario_dulces TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.pais_origen TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.pelicula TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.sala TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.ticket TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.tipo_cliente TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.tipo_pelicula TO 'vendedor1'@'localhost';
+GRANT SELECT ON cine_model_osorio.tipo_sala TO 'vendedor1'@'localhost';
+
+
+-- Asignación de permisos para el usuario inventario, este usuario puede hacer inserciones, eliminar, actualizar y visualizar
+GRANT SELECT, UPDATE, INSERT, DELETE ON cine_model_osorio.dulceria TO 'inventario'@'localhost';
+GRANT SELECT, UPDATE, INSERT, DELETE ON cine_model_osorio.inventario_dulces TO 'inventario'@'localhost';
+
+
+-- Asignación de permisos para el usuario administrador, para insertar, actualizar y visualizar
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.cliente TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.cine TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.codigo_postal TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.localidad TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.dulceria TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.factura TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.inventario_dulces TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.pais_origen TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.pelicula TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.sala TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.ticket TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.tipo_cliente TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.tipo_pelicula TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.tipo_sala TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.tbl_aud_cliente TO 'administrador'@'localhost';
+GRANT SELECT, UPDATE, INSERT ON cine_model_osorio.tbl_aud_dulceria TO 'administrador'@'localhost';
